@@ -18,6 +18,6 @@ A simple dodge game by pygame, for studying good practice of python programming 
 
 1. Go to release file.
 
-2. Download file.
+2. Download Dodgegame_v1.0.0_win_x86_64.zip file.
 
 3. Launch exe.
