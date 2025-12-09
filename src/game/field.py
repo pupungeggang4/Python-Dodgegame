@@ -1,6 +1,8 @@
 from .bullet import Bullet
 from .player import Player
 
+# Structure of field
+# Field will be handled in FieldHandler class
 class Field():
     def __init__(self):
         self.player: Player = Player()

@@ -1,25 +1,38 @@
 import pygame, sys
-from pygame._sdl2.video import Window, Renderer
+
+from pygame._sdl2.video import Window, Renderer, Texture
+from pygame import Surface, Rect
+from pygame.font import Font
+
+from .field import Field
+from .fieldhandler import FieldHandler
+
 import game.var as var
 
+# A class which controlls window, renderer and overall game flow.
 class GameHandler():
+    # Initalize game and calling loop.
     @staticmethod
     def run() -> None:
         pygame.init()
         pygame.font.init()
+        var.font = Font("font/neodgm.ttf", 32)
         var.window = Window("Dodge game", (800, 600))
         var.renderer = Renderer(var.window, vsync = True)
         var.clock = pygame.time.Clock()
+        var.field = Field()
         GameHandler.loop()
 
+    # Loop
     @staticmethod
     def loop() -> None:
         while True:
-            var.clock.tick(var.FPS)
+            var.clock.tick(var.fps)
             GameHandler.handle_input()
             GameHandler.handle_scene()
             GameHandler.render()
 
+    # Handling input
     @staticmethod
     def handle_input() -> None:
         for event in pygame.event.get():
@@ -27,12 +40,56 @@ class GameHandler():
                 pygame.quit()
                 sys.exit()
 
+            if event.type == pygame.KEYDOWN:
+                key: int = event.key
+                if key == pygame.K_LEFT:
+                    var.key_pressed['left'] = True
+                if key == pygame.K_RIGHT:
+                    var.key_pressed['right'] = True
+                if key == pygame.K_UP:
+                    var.key_pressed['up'] = True
+                if key == pygame.K_DOWN:
+                    var.key_pressed['down'] = True
+
+                if var.game_over == True:
+                    if key == pygame.K_RETURN:
+                        var.game_over = False
+                        FieldHandler.reset_state(var.field)
+                        var.elapsed_time = 0
+                        var.score = 0
+
+            if event.type == pygame.KEYUP:
+                key: int = event.key
+                if key == pygame.K_LEFT:
+                    var.key_pressed['left'] = False
+                if key == pygame.K_RIGHT:
+                    var.key_pressed['right'] = False
+                if key == pygame.K_UP:
+                    var.key_pressed['up'] = False
+                if key == pygame.K_DOWN:
+                    var.key_pressed['down'] = False
+    
+    # Handling scene
     @staticmethod
     def handle_scene() -> None:
-        pass
+        if var.game_over == False:
+            FieldHandler.handle_tick_field(var.field)
+            FieldHandler.move_player(var.field)
+            var.elapsed_time += 1 / var.fps
+            var.score = int(var.elapsed_time)
 
+    # Rendering
     @staticmethod
     def render() -> None:
         var.renderer.draw_color = (0, 0, 0, 255)
         var.renderer.clear()
+        FieldHandler.render(var.field)
+        text_surface: Surface = None
+        if var.game_over == False:
+            text_surface: Surface = var.font.render(f'Score: {var.score}', False, (255, 255, 0, 255))
+        else:
+            text_surface: Surface = var.font.render(f'Game Over! Press Enter to Restart.', False, (255, 255, 0, 255))
+        text_texture: Texture = Texture.from_surface(var.renderer, text_surface)
+        rect: Rect = text_texture.get_rect()
+        text_texture.draw(None, (20, 20, rect.width, rect.height))
         var.renderer.present()
