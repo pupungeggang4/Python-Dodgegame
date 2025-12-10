@@ -24,5 +24,4 @@ A simple dodge game by pygame, for studying good practice of python programming 
 
 ### Module hierarchy
 
-<img src="res/Hierarchy.png">
-?
+<img src="res/Hierarchy.jpg">
