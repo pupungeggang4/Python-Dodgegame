@@ -12,8 +12,7 @@ from .fieldhandler import FieldHandler
 # A class which controlls window, renderer and overall game flow.
 class GameHandler():
     # Initalize game and calling loop.
-    @staticmethod
-    def run(var: GameVar) -> None:
+    def run(self, var: GameVar) -> None:
         pygame.init()
         pygame.font.init()
         var.font = Font("font/neodgm.ttf", 32)
@@ -21,20 +20,18 @@ class GameHandler():
         var.renderer = Renderer(var.window, vsync = True)
         var.clock = pygame.time.Clock()
         var.field = Field()
-        GameHandler.loop()
+        self.loop(var)
 
     # Loop
-    @staticmethod
-    def loop(var: GameVar) -> None:
+    def loop(self, var: GameVar) -> None:
         while True:
             var.clock.tick(var.fps)
-            GameHandler.handle_input()
-            GameHandler.handle_scene()
-            GameHandler.render()
+            self.handle_input(var)
+            self.handle_scene(var)
+            self.render(var)
 
     # Handling input
-    @staticmethod
-    def handle_input(var: GameVar) -> None:
+    def handle_input(self, var: GameVar) -> None:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -54,7 +51,7 @@ class GameHandler():
                 if var.game_over == True:
                     if key == pygame.K_RETURN:
                         var.game_over = False
-                        FieldHandler.reset_state(var.field)
+                        FieldHandler.reset_state(var.field, var)
                         var.elapsed_time = 0
                         var.score = 0
 
@@ -70,20 +67,18 @@ class GameHandler():
                     var.key_pressed['down'] = False
     
     # Handling scene
-    @staticmethod
-    def handle_scene(var: GameVar) -> None:
+    def handle_scene(self, var: GameVar) -> None:
         if var.game_over == False:
-            FieldHandler.handle_tick_field(var.field, var.fps)
-            FieldHandler.move_player(var.field, var.key_pressed, var.fps)
+            FieldHandler.handle_tick_field(var.field, var)
+            FieldHandler.move_player(var.field, var)
             var.elapsed_time += 1 / var.fps
             var.score = int(var.elapsed_time)
 
     # Rendering
-    @staticmethod
-    def render(var: GameVar) -> None:
+    def render(self, var: GameVar) -> None:
         var.renderer.draw_color = (0, 0, 0, 255)
         var.renderer.clear()
-        FieldHandler.render(var.field, var.renderer)
+        FieldHandler.render(var.field, var)
         text_surface: Surface = None
         if var.game_over == False:
             text_surface: Surface = var.font.render(f'Score: {var.score}', False, (255, 255, 0, 255))

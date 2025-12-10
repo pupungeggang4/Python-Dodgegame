@@ -6,27 +6,26 @@ from .bullet import Bullet
 from .shape import Rect2
 
 from .physics import Physics
-
-import game.var as var
+from .gamevar import GameVar
 
 # A class which handles game logic
 class FieldHandler():
     # Handling field by ticks.
     @staticmethod
-    def handle_tick_field(field: Field) -> None:
+    def handle_tick_field(field: Field, var: GameVar) -> None:
         if field.bullet_spawn_time < 0:
-            FieldHandler.spawn_bullet(field)
+            FieldHandler.spawn_bullet(field, var)
             field.bullet_spawn_time = field.bullet_spawn_interval
         else:
             field.bullet_spawn_time -= 1 / var.fps
 
-        FieldHandler.handle_bullet(field)
+        FieldHandler.handle_bullet(field, var)
 
     # Handling spawning bullets.
     # The bullets are spwaned outside of field.
     # The bullets will cross the field.
     @staticmethod
-    def spawn_bullet(field: Field) -> None:
+    def spawn_bullet(field: Field, var: GameVar) -> None:
         spawn_index: int = randint(0, 3)
         bullet: Bullet = Bullet()
         if spawn_index == 0 or spawn_index == 2:
@@ -52,7 +51,7 @@ class FieldHandler():
     # Handling bullet.
     # Cheching whether bullet is outside of field, making bullets move, checking collision between player.
     @staticmethod
-    def handle_bullet(field: Field) -> None:
+    def handle_bullet(field: Field, var: GameVar) -> None:
         for i in range(len(field.bullet_list) - 1, -1, -1):
             bullet: Bullet = field.bullet_list[i]
             if bullet.rect.pos.x > 880 or bullet.rect.pos.x < -80 or bullet.rect.pos.y > 680 or bullet.rect.pos.y < -80:
@@ -65,7 +64,7 @@ class FieldHandler():
 
     # Field rendering function
     @staticmethod
-    def render(field: Field) -> None:
+    def render(field: Field, var: GameVar) -> None:
         var.renderer.draw_color = (0, 255, 255, 255)
         var.renderer.fill_rect([field.player.rect.pos.x - field.player.rect.size.x / 2, field.player.rect.pos.y - field.player.rect.size.y / 2, field.player.rect.size.x, field.player.rect.size.y])
         var.renderer.draw_color = (255, 255, 255, 255)
@@ -75,7 +74,7 @@ class FieldHandler():
 
     # Moving player
     @staticmethod
-    def move_player(field: Field) -> None:
+    def move_player(field: Field, var: GameVar) -> None:
         player: Player = field.player
         if var.key_pressed['left']:
             player.rect.pos.x -= player.speed / var.fps
@@ -88,7 +87,7 @@ class FieldHandler():
 
     # Restarting game
     @staticmethod
-    def reset_state(field: Field) -> None:
+    def reset_state(field: Field, var: GameVar) -> None:
         field.bullet_list = []
         field.player.rect.pos.x = 400
         field.player.rect.pos.y = 300
