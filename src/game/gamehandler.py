@@ -4,16 +4,16 @@ from pygame._sdl2.video import Window, Renderer, Texture
 from pygame import Surface, Rect
 from pygame.font import Font
 
+from .gamevar import GameVar
+
 from .field import Field
 from .fieldhandler import FieldHandler
-
-import game.var as var
 
 # A class which controlls window, renderer and overall game flow.
 class GameHandler():
     # Initalize game and calling loop.
     @staticmethod
-    def run() -> None:
+    def run(var: GameVar) -> None:
         pygame.init()
         pygame.font.init()
         var.font = Font("font/neodgm.ttf", 32)
@@ -25,7 +25,7 @@ class GameHandler():
 
     # Loop
     @staticmethod
-    def loop() -> None:
+    def loop(var: GameVar) -> None:
         while True:
             var.clock.tick(var.fps)
             GameHandler.handle_input()
@@ -34,7 +34,7 @@ class GameHandler():
 
     # Handling input
     @staticmethod
-    def handle_input() -> None:
+    def handle_input(var: GameVar) -> None:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -71,19 +71,19 @@ class GameHandler():
     
     # Handling scene
     @staticmethod
-    def handle_scene() -> None:
+    def handle_scene(var: GameVar) -> None:
         if var.game_over == False:
-            FieldHandler.handle_tick_field(var.field)
-            FieldHandler.move_player(var.field)
+            FieldHandler.handle_tick_field(var.field, var.fps)
+            FieldHandler.move_player(var.field, var.key_pressed, var.fps)
             var.elapsed_time += 1 / var.fps
             var.score = int(var.elapsed_time)
 
     # Rendering
     @staticmethod
-    def render() -> None:
+    def render(var: GameVar) -> None:
         var.renderer.draw_color = (0, 0, 0, 255)
         var.renderer.clear()
-        FieldHandler.render(var.field)
+        FieldHandler.render(var.field, var.renderer)
         text_surface: Surface = None
         if var.game_over == False:
             text_surface: Surface = var.font.render(f'Score: {var.score}', False, (255, 255, 0, 255))
